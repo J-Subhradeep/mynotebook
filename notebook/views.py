@@ -1,6 +1,6 @@
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect, render
-from .forms import RegistrationForm
+from .forms import RegistrationForm, LoginForm
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
@@ -34,7 +34,7 @@ def user_login(request):
         return render(request, 'notebook/html/indexforuser.html', {'user': request.user.username})
     if request.method == "POST":
 
-        fm = AuthenticationForm(request=request, data=request.POST)
+        fm = LoginForm(request=request, data=request.POST)
         if fm.is_valid():
             username = fm.cleaned_data.get('username')
             password = fm.cleaned_data.get('password')
@@ -43,7 +43,7 @@ def user_login(request):
                 login(request, user)
                 return HttpResponseRedirect('/user/')
         return render(request, 'notebook/html/login.html', {'form': fm})
-    fm = AuthenticationForm()
+    fm = LoginForm()
     return render(request, 'notebook/html/login.html', {'form': fm})
 
 
