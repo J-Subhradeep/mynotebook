@@ -1,13 +1,17 @@
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect, render
+
+from .tests import querystrtoperm
 from .forms import RegistrationForm, LoginForm
 from django.contrib import messages
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-
+from .models import Notes
 
 # Create your views here.
+
+
 def home(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('/user/')
@@ -24,8 +28,22 @@ def home(request):
 
 def user_page(request):
     if request.user.is_authenticated:
+        # print(request.user.has_perms('notebook.add_notes'))
+        # fetching permission data of user
+        # perms = list((Permission.objects.filter(user=request.user)))
+        # perms = list(map(lambda a: str(a), perms))
+        # print(list(map(querystrtoperm, perms)))
+
         if request.method == "POST":
-            print(request.POST)
+            data = dict(request.POST)
+            print(type(request.user.username))
+            note = Notes(username=request.user.username, title=data.get(
+                'title')[0], desc=data.get('description')[0])
+            print(note)
+            note.save()
+            messages.success(request, "Note Added")
+            return render(request, 'notebook/html/indexforuser.html',
+                          {'user': request.user.username})
         return render(request, 'notebook/html/indexforuser.html',
                       {'user': request.user.username})
     else:
