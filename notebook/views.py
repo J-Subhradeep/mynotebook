@@ -24,14 +24,18 @@ def home(request):
 
 def user_page(request):
     if request.user.is_authenticated:
-        return render(request, 'notebook/html/indexforuser.html', {'user': request.user.username})
+        if request.method == "POST":
+            print(request.POST)
+        return render(request, 'notebook/html/indexforuser.html',
+                      {'user': request.user.username})
     else:
         return HttpResponseRedirect('/login/')
 
 
 def user_login(request):
     if request.user.is_authenticated:
-        return render(request, 'notebook/html/indexforuser.html', {'user': request.user.username})
+        return render(request, 'notebook/html/indexforuser.html',
+                      {'user': request.user.username})
     if request.method == "POST":
 
         fm = LoginForm(request=request, data=request.POST)
