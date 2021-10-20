@@ -27,12 +27,6 @@ class RegistrationForm(UserCreationForm):
         email = cleaned_data['email']
         first_name = cleaned_data['first_name']
         last_name = cleaned_data['last_name']
-        if len(email) == 0:
-            raise forms.ValidationError("This field is required")
-        if len(first_name) == 0:
-            raise forms.ValidationError("This field is required")
-        if len(last_name) == 0:
-            raise forms.ValidationError("This field is required")
 
 
 class LoginForm(AuthenticationForm):

@@ -33,11 +33,11 @@ def user_page(request):
 
         if request.method == "POST":
             data = dict(request.POST)
-            print(type(request.user.username))
+
             note = Notes(username=request.user.username,
                          title=data.get('title')[0],
                          desc=data.get('description')[0])
-            print(note)
+
             note.save()
             messages.success(request, "Note Added")
             return HttpResponseRedirect('/user/')
@@ -110,11 +110,10 @@ def edit_note(request, id):
         return HttpResponseRedirect('/login/')
     reg = Notes.objects.filter(id=id).first()
     if request.method == "POST":
-        print(request.POST)
 
         data = dict(request.POST)
         if data.get('submit'):
-            print(True)
+
             if reg.username == request.user.username:
                 if request.POST['desc'] == "":
                     description = reg.desc
