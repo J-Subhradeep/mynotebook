@@ -1,4 +1,4 @@
-from django.http.response import HttpResponseRedirect
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 import json
 from .tests import querystrtoperm
@@ -39,9 +39,8 @@ def user_page(request):
                          desc=data.get('description')[0])
             print(note)
             note.save()
-            # messages.success(request, "Note Added")
-            return render(request, 'notebook/html/indexforuser.html',
-                          {'user': request.user.username})
+            messages.success(request, "Note Added")
+            return HttpResponseRedirect('/user/')
         return render(request, 'notebook/html/indexforuser.html',
                       {'user': request.user.username})
     else:
@@ -71,14 +70,16 @@ def user_login(request):
 def user_notes(request):
     if request.user.is_authenticated:
         notes = list(Notes.objects.filter(username=request.user.username))
+        ids = list(map(lambda a: a.id, notes))
         notes = list(map(lambda a: str(a), notes))
+        print(ids)
         notes = list(
             map(lambda a: json.loads(a),
                 notes))  # converting data(fetched from db ) to list of dict
         print(notes)
         return render(request, 'notebook/html/usernotes.html', {
             'user': request.user,
-            'notes': notes
+            'notes': zip(notes, ids)
         })
     else:
         return HttpResponseRedirect('/login/')
@@ -89,3 +90,13 @@ def user_logout(request):
     logout(request)
 
     return HttpResponseRedirect('/login/')
+
+
+def delete_notes(request, id):
+    if not request.user.is_authenticated:
+        messages.error(request, "You Must Have to Log in")
+        return HttpResponseRedirect('/login/')
+    reg = Notes.objects.filter(id=id)
+    reg.delete()
+    messages.success(request, "Note Deleted Successfully")
+    return HttpResponseRedirect('/notes/')
