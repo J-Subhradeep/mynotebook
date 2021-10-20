@@ -115,7 +115,10 @@
           </figure>
         </div>
         <div class="col">
-          <button class="btn btn-primary mx-2">Edit</button>
+          <a href="{% url 'editnotes' j %}"
+            ><button class="btn btn-primary mx-2">Edit</button></a
+          >
+
           <a href="{% url 'deletenotes' j %}"
             ><button class="btn btn-danger">Delete</button></a
           >

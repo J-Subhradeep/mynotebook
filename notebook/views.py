@@ -33,11 +33,11 @@ def user_page(request):
 
         if request.method == "POST":
             data = dict(request.POST)
-            print(type(request.user.username))
+
             note = Notes(username=request.user.username,
                          title=data.get('title')[0],
                          desc=data.get('description')[0])
-            print(note)
+
             note.save()
             messages.success(request, "Note Added")
             return HttpResponseRedirect('/user/')
@@ -72,11 +72,11 @@ def user_notes(request):
         notes = list(Notes.objects.filter(username=request.user.username))
         ids = list(map(lambda a: a.id, notes))
         notes = list(map(lambda a: str(a), notes))
-        print(ids)
+
         notes = list(
             map(lambda a: json.loads(a),
                 notes))  # converting data(fetched from db ) to list of dict
-        print(notes)
+
         return render(request, 'notebook/html/usernotes.html', {
             'user': request.user,
             'notes': zip(notes, ids)
@@ -96,7 +96,37 @@ def delete_notes(request, id):
     if not request.user.is_authenticated:
         messages.error(request, "You Must Have to Log in")
         return HttpResponseRedirect('/login/')
-    reg = Notes.objects.filter(id=id)
-    reg.delete()
-    messages.success(request, "Note Deleted Successfully")
+    reg = Notes.objects.filter(id=id).first()
+
+    if reg.username == request.user.username:
+        reg.delete()
+        messages.success(request, "Note Deleted Successfully")
     return HttpResponseRedirect('/notes/')
+
+
+def edit_note(request, id):
+    if not request.user.is_authenticated:
+        messages.error(request, "You Must Have to Log in")
+        return HttpResponseRedirect('/login/')
+    reg = Notes.objects.filter(id=id).first()
+    if request.method == "POST":
+
+        data = dict(request.POST)
+        if data.get('submit'):
+
+            if reg.username == request.user.username:
+                if request.POST['desc'] == "":
+                    description = reg.desc
+                else:
+                    description = request.POST['desc']
+                    messages.success(request, "The note successfully changed")
+                reg = Notes(id=id, username=request.user.username,
+                            title=request.POST['title'], desc=description)
+                reg.save()
+
+                return HttpResponseRedirect('/notes/')
+            messages.error(request, "Credential Error")
+            return HttpResponseRedirect('/notes/')
+
+        return HttpResponseRedirect('/notes/')
+    return render(request, 'notebook/html/edit.html', {'id': id, 'title': reg.title, 'desc': reg.desc})
